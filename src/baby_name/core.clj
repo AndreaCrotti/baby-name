@@ -1,28 +1,24 @@
-(ns baby-name.core)
+(ns baby-name.core
+  (:require [clojure.data.csv :as csv]))
 
-(def pth "/path-to-csv-file")
-(def last-name "Last")
+(def header [:name :first :second :p1 :p2])
 
-(def header [:name :meaning :first :second :p1 :p2])
+(defn combinations
+  [names]
+  (filter some?
+          (for [f (filter #(:first %) names)
+                s (filter #(:second %) names)]
 
-(def data (->> pth slurp csv/read-csv (drop 3)))
+            (when (not= (:name f) (:name s))
+              [(:name f) (:name s)]))))
 
-(def maps
-  (map #(zipmap header %) data))
+(defn combinations-from-csv
+  [filename]
+  (->> filename
+       slurp
+       csv/read-csv
+       (map (fn [v] (zipmap header v)))
+       combinations))
 
-(doseq [[f s]
-        (filter some?
-                (for [f (filter #(= "x" (:first %)) maps)
-                      s (filter #(= "x" (:second %)) maps)]
-
-                  (when (not= (:name f) (:name s))
-                    [(:name f) (:name s)])))]
-
-  (println f " " s " " last-name))
-
-(filter some?
-        (for [f (filter #(= "x" (:first %)) maps)
-              s (filter #(= "x" (:second %)) maps)]
-
-          (when (not= (:name f) (:name s))
-            [(:name f) (:name s)])))
+(defn -main [& [filename]]
+  (combinations-from-csv filename))
