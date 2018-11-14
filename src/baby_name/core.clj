@@ -1,7 +1,10 @@
 (ns baby-name.core
-  (:require [clojure.data.csv :as csv]))
+  (:require [clojure.data.csv :as csv]
+            [environ.core :as env]))
 
 (def header [:name :first :second :p1 :p2])
+
+(def behind-the-name-api-key (:behind-the-name-api-key env/env))
 
 (defn combinations
   [names]
